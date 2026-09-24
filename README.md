@@ -1,2 +1,16 @@
-# Demo-vpn-login-simple
-VPN login demo — simple version
+# VPN Login Demo
+
+เดโมหน้าเข้าสู่ระบบ VPN แบบเรียบง่าย มีตัวอย่างการเข้าใช้ด้วยอีเมล, Google และ Apple
+
+## เปิดเดโม
+
+[เปิดหน้า Demo](https://triphum1234-droid.github.io/Demo-vpn-login-simple/)
+
+## ไฟล์
+
+- `index.html` — หน้าเดโม
+- `vpn_login_test_cases.pdf` — Test Case สำหรับการเข้าสู่ระบบ
+
+## หมายเหตุ
+
+ปุ่มและผลลัพธ์ทั้งหมดเป็นการจำลอง ไม่มีการเชื่อมบัญชีจริง ไม่มี backend และไม่ได้เชื่อมต่อ VPN ข้อมูลที่กรอกจะไม่ถูกส่งหรือบันทึก
