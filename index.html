@@ -37,6 +37,21 @@
     input::placeholder{color:#94a0b2}
     input:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid rgb(50 107 229 / 24%);outline-offset:2px}
     .field-hint{margin:5px 0 0;color:var(--muted);font-size:12px}
+    .case-box{margin:0 0 20px;padding:14px;border:1px solid #d9e4f6;border-radius:12px;background:#f8faff}
+    .case-heading{display:flex;justify-content:space-between;gap:10px;margin-bottom:8px}
+    .case-title{font-weight:700}
+    .case-badge{flex:none;padding:2px 8px;border-radius:99px;background:#e8eef8;color:#44536a;font-size:12px;font-weight:700}
+    .case-meta,.case-data,.case-expected{margin:0 0 9px;font-size:13px}
+    .case-meta{color:var(--muted)}
+    .case-data{color:#435169;overflow-wrap:anywhere}
+    .case-data code{padding:1px 4px;border-radius:4px;background:#edf1f7;color:#233047;font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+    .tool-actions{display:flex;flex-wrap:wrap;gap:8px}
+    .tool-button{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:6px 11px;border:1px solid #cbd5e2;border-radius:9px;background:#fff;color:var(--ink);font:inherit;font-size:13px;font-weight:650;line-height:1.3;text-decoration:none;cursor:pointer}
+    .tool-button:hover{background:#f8faff}
+    .tool-button.primary{border-color:var(--blue);background:var(--blue);color:#fff}
+    .tool-button.primary:hover{background:var(--blue-dark)}
+    .forgot{display:block;margin:8px 0 0 auto;padding:0;border:0;background:none;color:var(--blue-dark);font-size:13px;text-decoration:underline;cursor:pointer}
+    [hidden]{display:none!important}
     .password-wrap{display:flex;gap:8px}
     .password-wrap input{flex:1;min-width:0}
     .show-password{min-width:72px;padding:0 10px;border:1px solid var(--line);background:#fff;color:var(--muted);font-size:13px}
@@ -64,22 +79,27 @@
         <h1 id="page-title">เข้าสู่ระบบ</h1>
         <p class="intro">เลือกวิธีที่สะดวกสำหรับคุณ</p>
         <div class="field">
-          <label for="scenario">เลือกเคสทดสอบ</label>
-          <select id="scenario" name="scenario">
-            <option value="success">เข้าสู่ระบบสำเร็จ · EM-01 / GO-01 / AP-01</option>
-            <option value="invalid">ข้อมูลไม่ถูกต้อง · EM-07</option>
-            <option value="unverified">ยังไม่ได้ยืนยันอีเมล · EM-09</option>
-            <option value="cancelled">ผู้ใช้ยกเลิก · GO-03 / AP-04</option>
-            <option value="network">เครือข่ายขัดข้อง · QU-01</option>
-          </select>
-          <p class="field-hint">เลือกผลลัพธ์ แล้วลองกดเข้าสู่ระบบ, Google หรือ Apple</p>
+          <label for="scenario">เลือกเคสทดสอบ (41 เคส)</label>
+          <select id="scenario" name="scenario" aria-describedby="case-help"></select>
+          <p class="field-hint" id="case-help">เลือกเคสเพื่อดูชุดข้อมูลตัวอย่าง แล้วกดเติมข้อมูลหรือทดลองปุ่มเข้าสู่ระบบ</p>
         </div>
+        <section class="case-box" aria-live="polite" aria-labelledby="case-title">
+          <div class="case-heading"><strong class="case-title" id="case-title"></strong><span class="case-badge" id="case-priority"></span></div>
+          <p class="case-meta" id="case-steps"></p>
+          <p class="case-data" id="case-data"></p>
+          <p class="case-expected"><strong>ผลที่คาด:</strong> <span id="case-expected-text"></span></p>
+          <div class="tool-actions">
+            <button class="tool-button primary" type="button" id="applyData">เติมข้อมูลตัวอย่าง</button>
+            <button class="tool-button" type="button" id="runCase">จำลองผลเคสนี้</button>
+            <a class="tool-button" href="./vpn_login_test_data.json" download>ดาวน์โหลดชุดข้อมูล</a>
+          </div>
+        </section>
         <div class="provider-list">
           <button class="provider" type="button" id="googleButton"><span class="provider-icon" aria-hidden="true">G</span>เข้าสู่ระบบด้วย Google</button>
           <button class="provider" type="button" id="appleButton"><span class="provider-icon" aria-hidden="true">A</span>เข้าสู่ระบบด้วย Apple</button>
         </div>
         <div class="divider"><span>หรือใช้อีเมล</span></div>
-        <form id="loginForm">
+          <form id="loginForm" novalidate>
           <div class="field">
             <label for="email">อีเมล</label>
             <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
@@ -90,42 +110,129 @@
               <input id="password" name="password" type="password" autocomplete="current-password" placeholder="กรอกรหัสผ่าน" required>
               <button class="show-password" id="showPassword" type="button" aria-pressed="false">แสดง</button>
             </div>
+            <button class="forgot" id="forgotPassword" type="button" hidden>ลืมรหัสผ่าน?</button>
           </div>
           <button class="submit" type="submit">เข้าสู่ระบบ</button>
           <p class="status" id="status" role="status" aria-live="polite"></p>
         </form>
-        <p class="demo-note">หน้าเดโมสำหรับทดลองเท่านั้น ปุ่มเข้าสู่ระบบเป็นการจำลอง ไม่มีการเชื่อมบัญชีจริงหรือ VPN</p>
+        <p class="demo-note">ชุดข้อมูลเป็นข้อมูลสมมติ ไม่มีการเชื่อมบัญชี Google/Apple, backend หรือ VPN เคส Session, Security และอุปกรณ์แสดงผลที่คาดหวังเพื่อใช้ตรวจบน staging/device จริง</p>
       </section>
       <p class="footer-note">ข้อมูลที่กรอกจะไม่ถูกส่งหรือบันทึก</p>
     </main>
   </div>
   <script>
+    const rows=[
+      ["EM-01","Email และ Password","เข้าสู่ระบบสำเร็จด้วยข้อมูลถูกต้อง","P1","email","qa.verified@demo.test","DemoPass!234","บัญชี verified และ active","กรอกข้อมูลที่ถูกต้องแล้วกดเข้าสู่ระบบ","เข้าได้ด้วยบัญชีที่ถูกต้องและไม่เริ่ม VPN เอง"],
+      ["EM-02","Email และ Password","ไม่กรอกอีเมลและรหัสผ่าน","P1","email","","","เว้นทั้งสองช่องว่าง","ปล่อยช่องว่างแล้วกดเข้าสู่ระบบ","แจ้งช่องที่ต้องกรอกและไม่สร้าง session"],
+      ["EM-03","Email และ Password","กรอกอีเมลแต่ไม่กรอกรหัสผ่าน","P1","email","qa.verified@demo.test","","บัญชี verified; เว้นรหัสผ่านว่าง","กรอกอีเมล เว้นรหัสผ่าน แล้วกดเข้าสู่ระบบ","แจ้งว่าต้องกรอกรหัสผ่าน โดยคงอีเมลไว้"],
+      ["EM-04","Email และ Password","ตรวจรูปแบบอีเมลที่ไม่ถูกต้อง","P1","email","qa-no-at-sign.demo.test","DemoPass!234","อีเมลตัวอย่างไม่มีเครื่องหมาย @","ใช้ค่าอีเมลผิดรูปแบบแล้วกดเข้าสู่ระบบ","ป้องกันการ Login และแจ้งรูปแบบอีเมลไม่ถูกต้อง"],
+      ["EM-05","Email และ Password","ตัวพิมพ์เล็กใหญ่และช่องว่างของอีเมล","P2","email"," QA.Verified@DEMO.TEST ","DemoPass!234","อีเมลตัวพิมพ์ผสมและมีช่องว่างหน้า/ท้าย","ใช้ข้อมูลตัวอย่างแล้วกดเข้าสู่ระบบ","จัดการอีเมลตามนโยบายและไม่เปลี่ยนเจ้าของบัญชี"],
+      ["EM-06","Email และ Password","รักษาค่ารหัสผ่านตามที่กรอก","P2","email","qa.spaces@demo.test","  DemoPass!234  ","บัญชีทดสอบที่ตั้งรหัสผ่านให้มีช่องว่าง","ใช้รหัสผ่านที่มีช่องว่างแล้วกดเข้าสู่ระบบ","ไม่ตัดหรือแก้รหัสผ่านโดยไม่ตั้งใจ"],
+      ["EM-07","Email และ Password","ไม่มีบัญชีหรือรหัสผ่านผิด","P1","email","missing.user@demo.test","WrongPass!234","บัญชีไม่มีอยู่; ลองรหัสผ่านผิดกับบัญชี staging แยกอีกครั้ง","ลองข้อมูลนี้และทำซ้ำด้วยบัญชีที่มีอยู่แต่รหัสผ่านผิด","ไม่สร้าง session และไม่เผยว่ามีบัญชีหรือไม่"],
+      ["EM-08","Email และ Password","แสดงและซ่อนรหัสผ่าน","P2","manual","qa.verified@demo.test","DemoPass!234","ใช้ข้อมูลสมมติและปุ่มแสดง/ซ่อนข้างช่องรหัสผ่าน","กดแสดงและซ่อนหลายครั้ง","ค่ารหัสผ่านไม่หาย และเริ่มต้นต้องซ่อนเมื่อเปิดหน้าใหม่"],
+      ["EM-09","Email และ Password","บัญชีถูกระงับหรือยังไม่ยืนยันอีเมล","P1","email","qa.unverified@demo.test","DemoPass!234","บัญชี disabled ใช้ qa.disabled@demo.test","ลองทั้งบัญชี unverified และ disabled ใน staging","ปฏิเสธ Login และไม่ออก session หรือสิทธิ์ VPN"],
+      ["EM-10","Email และ Password","จำกัดการลองรหัสผ่านซ้ำ","P1","email","qa.lockout@demo.test","WrongPass!234","บัญชี staging สำหรับ rate limit เท่านั้น","ลองรหัสผ่านผิดซ้ำตามเกณฑ์ของ staging","จำกัดการลอง แจ้งเวลารอ และไม่กระทบบัญชีอื่น"],
+      ["EM-11","Email และ Password","ลิงก์ลืมรหัสผ่าน","P2","manual","qa.reset@demo.test","","อีเมลทดสอบ qa.reset@demo.test และ qa.unknown@demo.test","ใช้ปุ่มลืมรหัสผ่าน; ตรวจลิงก์ใช้ได้ หมดอายุ และใช้ซ้ำ","ข้อความไม่บอกว่ามีบัญชีหรือไม่; ลิงก์หมดอายุ/ใช้ซ้ำไม่ได้"],
+      ["EM-12","Email และ Password","ตอบสนองช้าและกดเข้าสู่ระบบซ้ำ","P2","email","qa.verified@demo.test","DemoPass!234","ใช้ network throttling ใน staging","กดส่งซ้ำขณะระบบตอบสนองช้า","ป้องกันคำขอซ้ำและสร้าง session เดียว"],
+      ["GO-01","Google Account","เข้าสู่ระบบครั้งแรกด้วย Google","P1","google","google.first@demo.test","","บัญชี placeholder สำหรับ OAuth sandbox ไม่ใช่บัญชีจริง","กด Google และยืนยันใน OAuth sandbox","ยืนยันตัวตนและสร้าง/ผูกบัญชีตามนโยบายเพียงครั้งเดียว"],
+      ["GO-02","Google Account","เข้าสู่ระบบด้วย Google ที่ผูกบัญชีไว้แล้ว","P1","google","google.linked@demo.test","","บัญชี sandbox ที่ผูกกับบัญชีเดิม","ยืนยันด้วย Google account ที่ผูกไว้","กลับเข้าบัญชีเดิมโดยไม่สร้างบัญชีซ้ำ"],
+      ["GO-03","Google Account","ผู้ใช้ยกเลิก Google sign-in","P1","google","google.cancel@demo.test","","เลือกยกเลิกใน provider sandbox","เริ่ม Google sign-in แล้วกดยกเลิก","กลับหน้า Login โดยไม่มี session และเริ่มใหม่ได้"],
+      ["GO-04","Google Account","Google ปฏิเสธคำขอหรือ provider ขัดข้อง","P2","google","google.denied@demo.test","","จำลอง access denied/provider error ใน test configuration","เริ่ม Google sign-in แล้วจำลองการปฏิเสธ","แจ้งให้ลองใหม่ ไม่ค้าง และไม่สร้าง session"],
+      ["GO-05","Google Account","Google token หมดอายุหรือไม่ถูกต้อง","P1","google","google.token@demo.test","","expired-token.fixture (ชื่อ fixture เท่านั้น ไม่ใช่ token)","ส่ง fixture ที่ไม่ผ่านการตรวจใน backend staging","backend ปฏิเสธและไม่ให้สิทธิ์"],
+      ["GO-06","Google Account","callback มี state, nonce หรือ audience ไม่ตรง","P1","google","google.callback@demo.test","","state-mismatch.fixture และ audience-mismatch.fixture","ทดสอบ callback fixture ที่ไม่ตรงกับคำขอเดิม","ปฏิเสธ callback อย่างปลอดภัยและไม่สร้าง session"],
+      ["GO-07","Google Account","อีเมล Google ซ้ำกับบัญชีเดิม","P2","google","google.duplicate@demo.test","DemoPass!234","อีเมลเดียวกับบัญชี Email ที่ยังไม่ผูกกัน","เลือก Google แล้วตรวจขั้นตอนยืนยันการผูกบัญชี","ไม่รวมบัญชีเงียบ ๆ และไม่สร้างบัญชีซ้ำ"],
+      ["GO-08","Google Account","เครือข่ายขาดระหว่าง callback","P2","google","google.offline@demo.test","","ใช้ Google sandbox และ network conditioner","พักแอปและตัดเครือข่ายระหว่าง callback","ไม่มี session ครึ่งเดียวและเริ่ม flow ใหม่ได้"],
+      ["AP-01","Apple ID","เข้าสู่ระบบสำเร็จด้วย Apple ID","P1","apple","apple.qa@demo.test","","บัญชี placeholder สำหรับ Apple test environment ไม่ใช่ Apple ID จริง","กด Apple และยืนยันใน test environment","ตรวจ identity token และกลับสู่บัญชีที่ถูกต้อง"],
+      ["AP-02","Apple ID","ใช้ Hide My Email ในการสมัครครั้งแรก","P1","apple","relay-user@privaterelay.demo.test","","Apple Private Relay fixture placeholder","เลือก Hide My Email ใน Apple test environment","ผูกบัญชีด้วย Apple subject และจัดการ relay ตามนโยบาย"],
+      ["AP-03","Apple ID","เข้าสู่ระบบซ้ำเมื่อ Apple ไม่ส่งชื่อหรืออีเมลมาอีก","P1","apple","apple.returning@demo.test","","response รอบถัดไปไม่มี name/email","เข้าสู่ระบบด้วย Apple ID เดิมและตรวจโปรไฟล์","คงข้อมูลเดิมและไม่สร้างบัญชีใหม่"],
+      ["AP-04","Apple ID","ผู้ใช้ยกเลิก Apple sign-in","P1","apple","apple.cancel@demo.test","","เลือกยกเลิกใน Apple test environment","เริ่ม Apple sign-in แล้วกดยกเลิก","กลับหน้า Login โดยไม่มี session หรือบัญชีใหม่"],
+      ["AP-05","Apple ID","สิทธิ์ Apple ถูกถอนหรือ credential ถูกปฏิเสธ","P1","apple","apple.revoked@demo.test","","revoked-credential.fixture เป็นชื่อ fixture เท่านั้น","ทดสอบ credential ที่ถูกถอนใน test environment","ปฏิเสธ Login และไม่ใช้ token เก่าต่อ"],
+      ["AP-06","Apple ID","Apple token มาจากแอปหรือ audience อื่น","P1","apple","apple.audience@demo.test","","wrong-audience.fixture เป็นชื่อ fixture เท่านั้น","ส่ง fixture จาก client อื่นให้ backend staging ตรวจ","backend ปฏิเสธและไม่สร้าง session"],
+      ["SE-01","Session และความปลอดภัย","คงสถานะ Login หลังเปิดแอปใหม่","P2","manual","qa.verified@demo.test","DemoPass!234","บัญชี Login แล้ว; ระบุ policy remember-me/session","ปิดเปิดแอปและตรวจเมื่อ session หมดอายุ","คง session ตามนโยบายหรือขอ Login ใหม่อย่างปลอดภัย"],
+      ["SE-02","Session และความปลอดภัย","ต่ออายุ token หรือจัดการ token หมดอายุ","P1","manual","qa.session@demo.test","DemoPass!234","ตั้ง token อายุสั้นใน staging; expired-refresh.fixture","รอ token หมดอายุและตรวจกรณี refresh ใช้ไม่ได้","ต่ออายุอย่างปลอดภัยหรือออกจาก session เมื่อ refresh ล้มเหลว"],
+      ["SE-03","Session และความปลอดภัย","ออกจากระบบและเพิกถอน session","P1","manual","qa.logout@demo.test","DemoPass!234","บัญชีทดสอบที่ Login แล้วและมี API ตรวจ session","Logout แล้วเรียก API ที่ต้อง Login และกด Back","token เก่าใช้ไม่ได้และหน้าเดิมไม่เผยข้อมูล"],
+      ["SE-04","Session และความปลอดภัย","สลับบัญชีผู้ใช้","P2","manual","qa.user-a@demo.test","DemoPass!234","ผู้ใช้ B: qa.user-b@demo.test","Login A, Logout, Login B แล้วตรวจโปรไฟล์","ข้อมูลและ session ของ A ไม่ปะปนกับ B"],
+      ["SE-05","Session และความปลอดภัย","เปิด deep link ขณะออกจากระบบ","P1","manual","qa.deeplink@demo.test","DemoPass!234","deep link ของหน้าบัญชี/ตั้งค่า VPN ใน build ทดสอบ","Logout เปิด deep link แล้ว Login","ไม่แสดงข้อมูลก่อน Login และตรวจสิทธิ์หลัง Login"],
+      ["SE-06","Session และความปลอดภัย","จัดเก็บ token และตรวจการบันทึก log","P1","manual","qa.storage@demo.test","DemoPass!234","อุปกรณ์ทดสอบที่ตรวจ secure storage, network capture และ log ได้","Login ตรวจ storage/log แล้ว Logout และตรวจข้อมูลคงค้าง","ไม่มี credential/token ใน plain text, URL, analytics หรือ log"],
+      ["SE-07","Session และความปลอดภัย","Login ไม่เริ่ม VPN โดยไม่ตั้งใจ","P2","manual","qa.vpn-state@demo.test","DemoPass!234","บัญชีที่ไม่ได้เปิด auto-connect","Login ด้วยแต่ละ provider และตรวจ tunnel/permission","Login อย่างเดียวไม่เปิด VPN tunnel หรือ permission prompt"],
+      ["QU-01","เครือข่ายและการใช้งาน","ไม่มีเครือข่ายก่อนเริ่ม Login","P1","any","qa.offline@demo.test","DemoPass!234","เปิดโหมดออฟไลน์บน test device","ลอง Email, Google หรือ Apple ขณะออฟไลน์","แจ้งว่าไม่มีเครือข่าย ไม่ค้าง และไม่สร้าง session"],
+      ["QU-02","เครือข่ายและการใช้งาน","เครือข่ายขาดระหว่างยืนยันตัวตน","P1","any","qa.callback-offline@demo.test","","provider test account และ network conditioner","ตัดเครือข่ายระหว่าง redirect/callback แล้วคืนเครือข่าย","ไม่มี session ครึ่งเดียวและลองใหม่ได้"],
+      ["QU-03","เครือข่ายและการใช้งาน","ไม่มีแอป Google หรือ browser provider","P2","google","qa.provider-fallback@demo.test","","อุปกรณ์ทดสอบที่ไม่มี Google app/browser provider","เริ่ม Google flow และตรวจ fallback","ใช้ system browser/fallback หรือแจ้งทางเลือกโดยไม่ crash"],
+      ["QU-04","เครือข่ายและการใช้งาน","การเข้าถึงด้วย screen reader","P2","manual","qa.accessibility@demo.test","DemoPass!234","เปิด VoiceOver หรือ TalkBack บนอุปกรณ์ทดสอบ","ตรวจลำดับโฟกัส ข้อมูล และปุ่ม provider","label, ปุ่ม, state และข้อผิดพลาดอ่านได้ ไม่พึ่งสีอย่างเดียว"],
+      ["QU-05","เครือข่ายและการใช้งาน","แป้นพิมพ์และ password manager","P2","email","qa.autofill@demo.test","DemoPass!234","keyboard และ password manager บนอุปกรณ์ทดสอบ","ตรวจ keyboard, autofill และปุ่ม Done/Next","autofill ลงช่องถูกต้องและส่งข้อมูลได้โดยไม่บังปุ่ม"],
+      ["QU-06","เครือข่ายและการใช้งาน","ทดสอบ OS และขนาดหน้าจอ","P2","manual","qa.device@demo.test","DemoPass!234","อุปกรณ์/Simulator ตาม OS ที่ผลิตภัณฑ์รองรับ","ทำ smoke test สามวิธี Login บนหน้าจอเล็ก","หน้าจอไม่ล้น ปุ่มกดได้ และ callback ทำงาน"],
+      ["QU-07","เครือข่ายและการใช้งาน","ข้อความหลายภาษาและขนาดตัวอักษร","P3","manual","qa.locale@demo.test","DemoPass!234","ภาษาที่รองรับและขนาดตัวอักษรแบบขยาย","เปลี่ยนภาษาและขยายตัวอักษรแล้วตรวจหน้าจอ","ข้อความไม่ถูกตัดหรือทับกันและส่วนควบคุมยังใช้ได้"],
+      ["QU-08","เครือข่ายและการใช้งาน","ลอง Login, Logout และ Login ซ้ำหลายรอบ","P2","manual","qa.repeat@demo.test","DemoPass!234","บัญชี staging; สลับ Email, Google และ Apple ที่ผูกไว้","ทำ Login/Logout ซ้ำ 10 รอบแล้วตรวจ session","ไม่มี session เก่า บัญชีซ้ำ ความช้าผิดปกติ หรือ crash"]
+    ];
+    const testCases=rows.map(row=>({id:row[0],group:row[1],title:row[2],priority:row[3],action:row[4],email:row[5],password:row[6],fixture:row[7],steps:row[8],expected:row[9]}));
+    const scenario=document.getElementById("scenario");
     const statusText=document.getElementById("status");
-    function showLoginResult(method){
-      const scenario=document.getElementById("scenario").value;
-      const results={
-        success:`ตัวอย่าง: เข้าสู่ระบบสำเร็จด้วย ${method} (ไม่ได้ยืนยันบัญชีจริง)`,
-        invalid:method==="อีเมล"?"ตัวอย่าง: อีเมลหรือรหัสผ่านไม่ถูกต้อง":`ตัวอย่าง: ไม่สามารถยืนยันบัญชี ${method} ได้`,
-        unverified:`ตัวอย่าง: กรุณายืนยันอีเมลก่อนเข้าสู่ระบบด้วย ${method}`,
-        cancelled:`ตัวอย่าง: ยกเลิกการเข้าสู่ระบบด้วย ${method} แล้ว`,
-        network:"ตัวอย่าง: เครือข่ายขัดข้อง กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่"
-      };
-      statusText.textContent=results[scenario];
+    const emailInput=document.getElementById("email");
+    const passwordInput=document.getElementById("password");
+    [...new Set(testCases.map(item=>item.group))].forEach(group=>{
+      const groupElement=document.createElement("optgroup");
+      groupElement.label=group;
+      testCases.filter(item=>item.group===group).forEach(item=>{
+        const option=document.createElement("option");
+        option.value=item.id;
+        option.textContent=item.id+" · "+item.title;
+        groupElement.append(option);
+      });
+      scenario.append(groupElement);
+    });
+    function selectedCase(){return testCases.find(item=>item.id===scenario.value)}
+    function renderCase(){
+      const item=selectedCase();
+      document.getElementById("case-title").textContent=item.id+" · "+item.title;
+      document.getElementById("case-priority").textContent=item.priority;
+      document.getElementById("case-steps").textContent="วิธีลอง: "+item.steps;
+      const emailText=item.email===null?"":(item.email===""?"อีเมล: (เว้นว่าง)":"อีเมล: "+item.email);
+      const passwordText=item.password===null?"":(item.password===""?"รหัสผ่าน: (เว้นว่าง)":"รหัสผ่าน: "+item.password);
+      document.getElementById("case-data").textContent="ข้อมูลทดสอบ: "+[emailText,passwordText,item.fixture].filter(Boolean).join(" · ");
+      document.getElementById("case-expected-text").textContent=item.expected;
+      document.getElementById("forgotPassword").hidden=item.id!=="EM-11";
+      statusText.textContent="";
     }
+    function applySample(){
+      const item=selectedCase();
+      if(item.email!==null)emailInput.value=item.email;
+      if(item.password!==null)passwordInput.value=item.password;
+      statusText.textContent="เติมข้อมูลตัวอย่างของ "+item.id+" แล้ว";
+      if(item.id==="EM-08")passwordInput.focus();
+    }
+    function runAction(method){
+      const item=selectedCase();
+      if(item.action==="manual"){
+        statusText.textContent=item.id+": ต้องตรวจบน staging หรืออุปกรณ์จริง; เดโมนี้ไม่ได้ตรวจ session, token หรืออุปกรณ์จริง";
+      }else if(item.action!=="any"&&item.action!==method){
+        const target={email:"อีเมล",google:"Google",apple:"Apple"}[item.action];
+        statusText.textContent="เคส "+item.id+" ใช้ "+target+" — เลือกปุ่มที่ตรงกับเคสนี้";
+      }else{
+        statusText.textContent="ผลจำลอง "+item.id+": "+item.expected+" (ไม่มีการยืนยันตัวตนจริง)";
+      }
+    }
+    scenario.addEventListener("change",renderCase);
+    document.getElementById("applyData").addEventListener("click",applySample);
+    document.getElementById("runCase").addEventListener("click",()=>{
+      const item=selectedCase();
+      statusText.textContent="ผลจำลอง "+item.id+": "+item.expected+" (เป็นข้อความตัวอย่างเท่านั้น)";
+    });
     document.getElementById("loginForm").addEventListener("submit",event=>{
       event.preventDefault();
-      showLoginResult("อีเมล");
+      runAction("email");
     });
-    document.getElementById("googleButton").addEventListener("click",()=>showLoginResult("Google"));
-    document.getElementById("appleButton").addEventListener("click",()=>showLoginResult("Apple"));
+    document.getElementById("googleButton").addEventListener("click",()=>runAction("google"));
+    document.getElementById("appleButton").addEventListener("click",()=>runAction("apple"));
+    document.getElementById("forgotPassword").addEventListener("click",()=>runAction("email"));
     document.getElementById("showPassword").addEventListener("click",event=>{
-      const password=document.getElementById("password");
       const button=event.currentTarget;
-      const showing=password.type==="password";
-      password.type=showing?"text":"password";
+      const showing=passwordInput.type==="password";
+      passwordInput.type=showing?"text":"password";
       button.textContent=showing?"ซ่อน":"แสดง";
       button.setAttribute("aria-pressed",String(showing));
+      if(selectedCase().id==="EM-08")statusText.textContent="สลับแสดง/ซ่อนแล้ว ตรวจว่าค่ารหัสผ่านยังอยู่ครบ";
     });
+    renderCase();
   </script>
 </body>
 </html>
