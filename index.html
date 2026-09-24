@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f7fb">
+  <title>VPN Login Demo</title>
+  <style>
+    :root{color-scheme:light;--ink:#233047;--muted:#68758a;--line:#dce3ec;--blue:#326be5;--blue-dark:#2457c6;--paper:#fff;--page:#f4f7fb;--soft-blue:#eef4ff}
+    *{box-sizing:border-box}
+    body{margin:0;min-width:320px;min-height:100vh;background:var(--page);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+    a{color:var(--blue-dark)}
+    .page{width:min(100% - 32px,980px);margin:0 auto}
+    .topbar{min-height:78px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+    .brand{display:inline-flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none}
+    .brand-mark{width:38px;height:38px;display:grid;place-items:center;border-radius:12px;background:var(--soft-blue);color:var(--blue-dark);font-size:13px;font-weight:800;letter-spacing:-.04em}
+    .brand-name{display:block;font-size:15px;font-weight:700}
+    .brand-caption{display:block;margin-top:-2px;color:var(--muted);font-size:12px}
+    .pdf-link{font-size:14px;font-weight:600;text-decoration:none}
+    .pdf-link:hover{text-decoration:underline}
+    main{display:grid;place-items:center;padding:34px 0 48px}
+    .card{width:min(100%,448px);padding:34px;border:1px solid var(--line);border-radius:16px;background:var(--paper);box-shadow:0 12px 32px rgb(25 48 86 / 6%)}
+    .eyebrow{color:var(--blue-dark);font-size:12px;font-weight:750;letter-spacing:.08em}
+    h1{margin:8px 0 4px;font-size:28px;line-height:1.25;letter-spacing:-.025em}
+    .intro{margin:0 0 24px;color:var(--muted)}
+    .provider-list{display:grid;gap:10px}
+    button,input{font:inherit}
+    .provider,.submit,.show-password{min-height:46px;border-radius:9px;cursor:pointer}
+    .provider{width:100%;display:flex;align-items:center;justify-content:center;gap:9px;border:1px solid var(--line);background:#fff;color:var(--ink);font-weight:600}
+    .provider:hover{background:#f8faff;border-color:#b9c9e1}
+    .provider-icon{width:20px;font-size:15px;font-weight:800;text-align:center}
+    .divider{display:flex;align-items:center;gap:12px;margin:22px 0 18px;color:var(--muted);font-size:13px}
+    .divider:before,.divider:after{content:"";height:1px;flex:1;background:var(--line)}
+    .field{margin-bottom:16px}
+    label{display:block;margin-bottom:6px;font-size:14px;font-weight:650}
+    input{width:100%;min-height:46px;padding:10px 12px;border:1px solid #cbd5e2;border-radius:9px;background:#fff;color:var(--ink)}
+    input::placeholder{color:#94a0b2}
+    input:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid rgb(50 107 229 / 24%);outline-offset:2px}
+    .password-wrap{display:flex;gap:8px}
+    .password-wrap input{flex:1;min-width:0}
+    .show-password{min-width:72px;padding:0 10px;border:1px solid var(--line);background:#fff;color:var(--muted);font-size:13px}
+    .show-password:hover{background:#f8faff}
+    .submit{width:100%;border:0;background:var(--blue);color:#fff;font-weight:700}
+    .submit:hover{background:var(--blue-dark)}
+    .status{min-height:24px;margin:12px 0 0;color:var(--blue-dark);font-size:14px}
+    .demo-note{margin:18px 0 0;padding:11px 12px;border-radius:9px;background:#f5f7fa;color:#59677c;font-size:12px}
+    .footer-note{margin:16px 0 0;color:var(--muted);font-size:13px;text-align:center}
+    @media(max-width:520px){.topbar{min-height:68px}.card{padding:26px 20px}h1{font-size:25px}.pdf-link{font-size:13px}}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="VPN Demo หน้าหลัก">
+        <span class="brand-mark" aria-hidden="true">VPN</span>
+        <span><span class="brand-name">VPN Login</span><span class="brand-caption">หน้าเดโม</span></span>
+      </a>
+      <a class="pdf-link" href="./vpn_login_test_cases.pdf">ดู Test Case (PDF)</a>
+    </header>
+    <main>
+      <section class="card" aria-labelledby="page-title">
+        <div class="eyebrow">VPN LOGIN</div>
+        <h1 id="page-title">เข้าสู่ระบบ</h1>
+        <p class="intro">เลือกวิธีที่สะดวกสำหรับคุณ</p>
+        <div class="provider-list">
+          <button class="provider" type="button" id="googleButton"><span class="provider-icon" aria-hidden="true">G</span>เข้าสู่ระบบด้วย Google</button>
+          <button class="provider" type="button" id="appleButton"><span class="provider-icon" aria-hidden="true">A</span>เข้าสู่ระบบด้วย Apple</button>
+        </div>
+        <div class="divider"><span>หรือใช้อีเมล</span></div>
+        <form id="loginForm">
+          <div class="field">
+            <label for="email">อีเมล</label>
+            <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+          </div>
+          <div class="field">
+            <label for="password">รหัสผ่าน</label>
+            <div class="password-wrap">
+              <input id="password" name="password" type="password" autocomplete="current-password" placeholder="กรอกรหัสผ่าน" required>
+              <button class="show-password" id="showPassword" type="button" aria-pressed="false">แสดง</button>
+            </div>
+          </div>
+          <button class="submit" type="submit">เข้าสู่ระบบ</button>
+          <p class="status" id="status" role="status" aria-live="polite"></p>
+        </form>
+        <p class="demo-note">หน้าเดโมสำหรับทดลองเท่านั้น ปุ่มเข้าสู่ระบบเป็นการจำลอง ไม่มีการเชื่อมบัญชีจริงหรือ VPN</p>
+      </section>
+      <p class="footer-note">ข้อมูลที่กรอกจะไม่ถูกส่งหรือบันทึก</p>
+    </main>
+  </div>
+  <script>
+    const statusText=document.getElementById("status");
+    document.getElementById("loginForm").addEventListener("submit",event=>{
+      event.preventDefault();
+      statusText.textContent="ตัวอย่าง: เข้าสู่ระบบสำเร็จ (ไม่ได้ยืนยันบัญชีจริง)";
+    });
+    document.getElementById("googleButton").addEventListener("click",()=>{
+      statusText.textContent="ตัวอย่าง Google: ไม่มีการเชื่อมต่อบัญชีจริง";
+    });
+    document.getElementById("appleButton").addEventListener("click",()=>{
+      statusText.textContent="ตัวอย่าง Apple: ไม่มีการเชื่อมต่อบัญชีจริง";
+    });
+    document.getElementById("showPassword").addEventListener("click",event=>{
+      const password=document.getElementById("password");
+      const button=event.currentTarget;
+      const showing=password.type==="password";
+      password.type=showing?"text":"password";
+      button.textContent=showing?"ซ่อน":"แสดง";
+      button.setAttribute("aria-pressed",String(showing));
+    });
+  </script>
+</body>
+</html>
