@@ -1,6 +1,6 @@
 # VPN Login Demo
 
-เดโมหน้าเข้าสู่ระบบ VPN แบบเรียบง่าย พร้อมเคสทดสอบ 41 รายการ ครอบคลุม Email/Password, Google Account, Apple ID, Session/Security และเครือข่าย/การใช้งาน
+เดโมหน้าเข้าสู่ระบบ VPN แบบเรียบง่าย แยกแผงเลือกเคสทดสอบออกจากฟอร์ม Login พร้อม 41 เคส ครอบคลุม Email/Password, Google Account, Apple ID, Session/Security และเครือข่าย/การใช้งาน
 
 ## เปิดเดโม
 
